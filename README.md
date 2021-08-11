@@ -1,5 +1,6 @@
 # PM2.5-Prediction
 ## 李宏毅2020《机器学习》课程作业---预测PM2.5值   
+Hung-yi Lee machine learning homework
 手写一个<strong>线性回归</strong>，使用连续九个小时的相关信息预测第10个小时的PM2.5值    
 数据集分为train.csv和test.csv   
 <strong>train.csv</strong>保存了12个月的数据，每个月取前20天，每小时记录一次数据   
