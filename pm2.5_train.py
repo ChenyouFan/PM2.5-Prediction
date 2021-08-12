@@ -2,6 +2,64 @@ import numpy as np
 import pandas as pd
 import math
 
+
+def adagrad(train_set, val_set, train_label, val_label, weights, bias, iterations, lr):
+    adagrad_w = np.zeros((18 * 9, 1))
+    adagrad_b = 0
+    # 防止Adagrad优化时分母为0
+    eps = 10 ** -10
+    for t in range(iterations):
+        # 预测值
+        y_hat = np.dot(train_set, weights) + bias
+
+        # MSE 损失函数
+        loss = np.sum(np.power(y_hat - train_label, 2)) / len(train_set)
+        if t % 100 == 0:  # 每100轮使用验证集验证
+            y_pre = np.dot(val_set, weights) + bias
+            loss_val = np.sum(np.power(y_pre - val_label, 2)) / len(val_set)
+            print('after ' + str(t) + ' epoch, the validation loss is:', loss_val, ', the train loss is:', loss)
+
+        # 计算梯度
+        gradient_w = 2 * np.dot(train_set.T, y_hat - train_label) / len(train_set)
+        gradient_b = np.sum(2 * (y_hat - train_label)) / len(train_set)
+
+        # Adagrad算法更新w和b
+        adagrad_w += gradient_w ** 2
+        adagrad_b += gradient_b ** 2
+        weights -= lr * gradient_w / np.sqrt(adagrad_w + eps)
+        bias -= lr * gradient_b / np.sqrt(adagrad_b + eps)
+
+    return weights, bias
+
+
+def sgdm(train_set, val_set, train_label, val_label, weights, bias, iterations, beta):
+    vw = np.zeros((18 * 9, 1))
+    vb = np.zeros(1)
+
+    for t in range(iterations):
+        # 预测值
+        y_hat = np.dot(train_set, weights) + bias
+
+        # MSE 损失函数
+        loss = np.sum(np.power(y_hat - train_label, 2)) / len(train_set)
+        if t % 100 == 0:  # 每100轮使用验证集验证
+            y_pre = np.dot(val_set, weights) + bias
+            loss_val = np.sum(np.power(y_pre - val_label, 2)) / len(val_set)
+            print('after ' + str(t) + ' epoch, the validation loss is:', loss_val, ', the train loss is:', loss)
+
+        # 计算梯度
+        gradient_w = 2 * np.dot(train_set.T, y_hat - train_label) / len(train_set)
+        gradient_b = np.sum(2 * (y_hat - train_label)) / len(train_set)
+
+        # SGDM算法优化
+        vw = beta * vw + (1 - beta) * gradient_w
+        vb = beta * vb + (1 - beta) * gradient_b
+        weights -= vw
+        bias -= vb
+
+    return weights, bias
+
+
 data = pd.read_csv('./train.csv', encoding='big5')
 
 data = data.iloc[:, 3:]
@@ -58,32 +116,10 @@ w = np.random.normal(size=[18*9, 1])
 np.random.seed(17)
 b = np.random.normal(size=1)
 
-# 迭代次数
-iterations = 7000
-# 使用Adagrad算法优化
-adagrad = np.zeros((18*9, 1))
-adagrad_b = 0
-# 初始学习率
-lr = 100
-# 防止Adagrad分母为0
-eps = 10**-10
-
-for i in range(iterations):
-    # 预测值
-    y_hat = np.dot(x_train, w) + b
-    # MSE 损失函数
-    loss = np.sum(np.power(y_hat - y_train, 2)) / len(x_train)
-    if i % 100 == 0:        # 每100轮使用验证集验证
-        y_pre = np.dot(x_val, w) + b
-        loss_val = np.sum(np.power(y_pre - y_val, 2)) / len(x_val)
-        print('after '+str(i)+' epoch, the validation loss is:', loss_val, ', the train loss is:', loss)
-    # 梯度下降更新w和b
-    gradient = 2 * np.dot(x_train.T, y_hat-y_train)
-    gradient_b = np.sum(2 * (y_hat - y_train))/len(x_train)
-    adagrad += gradient ** 2
-    adagrad_b += gradient_b ** 2
-    w = w - lr * gradient / np.sqrt(adagrad+eps)
-    b = b - lr * gradient_b / np.sqrt(adagrad_b+eps)
+iteration_time = 7000       # 迭代次数
+learning_rate = 100     # Adagrad 初始学习率
+beta = 0.99     # SGDM 超参
+w, b = sgdm(x_train, x_val, y_train, y_val, w, b, iteration_time, beta)
 
 # 保存训练好的参数
 np.save('weights.npy', w)
