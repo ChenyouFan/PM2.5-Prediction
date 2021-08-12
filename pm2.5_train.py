@@ -4,6 +4,26 @@ import math
 
 
 def adagrad(train_set, val_set, train_label, val_label, weights, bias, iterations, lr):
+    """梯度下降优化器 Adagrad
+
+        在传统梯度下降的基础上，考虑二阶微分的影响，在一阶微分上取点估计二阶微分
+
+        Args:
+            train_set: 训练集数据
+            val_set: 验证集数据
+            train_label: 训练集标签
+            val_label: 验证集标签
+            weights: 初始权重
+            bias: 初始偏置
+            iterations: 迭代次数
+            lr: 初始学习率
+
+        Returns:
+            返回训练好的参数
+
+            weights: 训练好的权重
+            bias: 训练好的偏置
+        """
     adagrad_w = np.zeros((18 * 9, 1))
     adagrad_b = 0
     # 防止Adagrad优化时分母为0
@@ -33,7 +53,27 @@ def adagrad(train_set, val_set, train_label, val_label, weights, bias, iteration
 
 
 def sgdm(train_set, val_set, train_label, val_label, weights, bias, iterations, beta):
-    vw = np.zeros((18 * 9, 1))
+    """梯度下降优化器 SGDM
+
+        带有动量的SGD优化器，每次更新考虑当前权重和上一次更新
+
+        Args:
+            train_set: 训练集数据
+            val_set: 验证集数据
+            train_label: 训练集标签
+            val_label: 验证集标签
+            weights: 初始权重
+            bias: 初始偏置
+            iterations: 迭代次数
+            beta: 超参，控制当前权重和上次更新在本次更新所占比重
+
+        Returns:
+            返回训练好的参数
+
+            weights: 训练好的权重
+            bias: 训练好的偏置
+        """
+    vw = np.zeros((18 * 9, 1))      # 动量
     vb = np.zeros(1)
 
     for t in range(iterations):
